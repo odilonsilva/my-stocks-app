@@ -14,211 +14,33 @@
         <h1>
             Cotações
         </h1>
-        <button id="btn-add" class="btn btn-add">
+        <button id="btn-add" class="btn btn-add" onclick="openAddStock()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         </button>
     </div>
-    <!-- <p>
-        We are using Node.js <span id="node-version"></span>,
-        Chromium <span id="chrome-version"></span>,
-        and Electron <span id="electron-version"></span>.
-    </p> -->
-    <div class="stocks">
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div class="flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div class="flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">BTC</div>
-            <div style="display: flex">
-                <div class="card-price">172,546.11</div>
-                <div class="card-percent positive">+0,74%</div>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-title">MGLU3</div>
-            <div style="display: flex">
-                <div class="card-price">1,77</div>
-                <div class="card-percent negative">+23,78%</div>
-            </div>
-        </div>
-    </div>
+    
+    <div class="stocks"></div>
     <div class="entries-container">
         <div class="entries">
-            <h3>Adicionar cotação</h3>
+            <div class="flex flex-center">
+                <div class="flex flex-center" style="flex-grow: 4;">
+                    <h3>Adicionar cotação</h3>
+                </div>
+                <div class="flex flex-end">
+                    <button id="btn-close" class="btn btn-close" onclick="closeAddStock()">
+                        X
+                    </button>
+                </div>
+            </div>
             <label for="url">Cotação URL</label>
-            <input type="text" id="url" placeholder="Digite ou  cole a URL da cotação">
-            <button>Salvar</button>
+            <input type="text" id="url" placeholder="Digite ou  cole a URL da cotação" value="https://www.infomoney.com.br/cotacoes/b3/acao/via-viia3/">
+            <span id="emptyUrl" class="error">Preencha o campo URL</span>
+            <span id="urlError" class="error">URL inválida.</span>
+            <button id="btn-save" class="btn-save" onclick="saveUrl()">Salvar</button>
         </div>
     </div>
+    <script src="src/renderer.js"></script>
 </body>
 </html>
