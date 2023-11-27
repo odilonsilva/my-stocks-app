@@ -1,3 +1,6 @@
+let stocks = [];
+let filter = 'all';
+
 function openAddStock() {
   const backdrop = document.querySelector('.entries-container')
   backdrop.style = 'display: block'
@@ -41,12 +44,10 @@ async function saveUrl() {
   }
 }
 
-window.electronAPI.updateListHandler((event, value) => {
-  mountStock(value);
-  closeAddStock();
-});
-
 function mountStock(stock) {
+  const updated_at = document.querySelector('#updated_at');
+  updated_at.textContent = new Date(stock.updated_at).toLocaleString()
+
   const stocksContainer = document.querySelector('.stocks');
   const newStock = `
   <div class="flex items-container">
@@ -71,7 +72,7 @@ function remove(id) {
   if (window.confirm('Deseja excluir esse item')){
     window.electronAPI.deleteStock(id);
     clearStocks();
-    window.electronAPI.loadStocks();
+    loadStocks();
   }
 }
 
@@ -80,4 +81,57 @@ function clearStocks() {
   stocksContainer.innerHTML = '';
 }
 
-window.electronAPI.loadStocks();
+window.electronAPI.updateListHandler((event, value) => {
+  mountStock(value);
+  closeAddStock();
+});
+
+function setFilter(element, value) {
+  const filterList = document.querySelectorAll('.filters button');
+  filter = value;
+  
+  for(const filter of filterList){
+    filter.classList.remove('active');
+    console.log(filter)
+  }
+  
+  element.classList.add('active');
+  clearStocks();
+  
+  if (value === 'all') {
+    loadStocks();
+  } else if (value === 'positive') {
+    const stocksLocal = stocks.filter((item) => item.status === 'positive');
+    for(const stock of stocksLocal) {
+      mountStock(stock);
+    }
+  } else if (value === 'negative') {
+    const stocksLocal = stocks.filter((item) => item.status === 'negative');
+    for(const stock of stocksLocal) {
+      mountStock(stock);
+    }
+  }
+}
+
+async function loadStocks() {
+  stocks = await window.electronAPI.loadStocks();
+  for(const stock of stocks) {
+    mountStock(stock)
+  }
+}
+
+async function updateData() {
+  console.log(`updated at`, (new Date()).toLocaleString())
+  const selectedElement = document.querySelector('.filters button.active');
+
+  await window.electronAPI.updateData();
+
+  clearStocks();
+  setFilter(selectedElement, filter);
+}
+//a cada 10 min
+setInterval(updateData, 600000);
+
+loadStocks();
+updateData();
+console.log('started at', (new Date()).toLocaleString())

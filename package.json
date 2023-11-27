@@ -4,12 +4,20 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "build": "babel src -d dist && electron-builder"
+    "start": "electron-forge start",
+    "build": "babel src -d dist && electron-builder",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "author": "Odilon Silva",
   "license": "ISC",
   "devDependencies": {
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-deb": "^6.4.2",
+    "@electron-forge/maker-rpm": "^6.4.2",
+    "@electron-forge/maker-squirrel": "^6.4.2",
+    "@electron-forge/maker-zip": "^6.4.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
     "electron": "^27.0.3"
   },
   "babel": {
@@ -21,6 +29,7 @@
     "@babel/core": "^7.23.3",
     "@babel/node": "^7.22.19",
     "@babel/preset-env": "^7.23.3",
+    "electron-squirrel-startup": "^1.0.0",
     "lodash": "^4.17.21",
     "puppeteer": "^21.5.1"
   }

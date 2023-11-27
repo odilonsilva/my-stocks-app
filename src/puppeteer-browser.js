@@ -38,14 +38,15 @@ exports.findStock = async (url) => {
 
   textSelector = await page.waitForSelector('.quotes-header-info .line-info .percentage p');
   const percentageContent = await textSelector?.evaluate(el => el.textContent);
-
+  const updated_at = new Date();
   // Print the full title
   stock = {
     url,
+    updated_at,
     title: titleContent.trim(),
     value: valueContent.trim(),
     percentage: percentageContent.trim(),
-    status: percentageContent.trim().charAt(0) == '+'? 'positive' : 'negative',
+    status: percentageContent.trim().charAt(0) == '+'? 'positive' : 'negative'
   }
   await browser.close();
   // console.log('stock', stock);

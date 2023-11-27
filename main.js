@@ -9,12 +9,13 @@ let mainWindow;
 function createWindow () {
   const primaryDisplay = screen.getPrimaryDisplay()
   const {width, height} = primaryDisplay.workAreaSize
-  const boundX = width - 390
+  const boundX = width - 400
   
   mainWindow = new BrowserWindow({
     width: 400,
     height: height,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
+    frame: false,
     x: boundX,
     y: 0,
     webPreferences: {
@@ -26,18 +27,27 @@ function createWindow () {
 }
 
 app.whenReady().then(() => {
-  const icon = nativeImage.createFromPath('assets/images/ganho.png')
+  const icon = nativeImage.createFromPath('assets/images/ganho-icon.png');
+  icon.resize({
+    height: 32,
+    width: 32,
+    quality: 'better'
+  })
   const tray = new Tray(icon)
   const contextMenu = Menu.buildFromTemplate([
-    {label: 'Item1', type: 'normal', toolTip: 'item 1 aqui'},
-    {label: 'Item2', type: 'checkbox', toolTip: 'item 2 aqui'},
-    {label: 'Item3', type: 'radio', toolTip: 'item 3 aqui'}
+    {label: 'Sair', type: 'normal', toolTip: 'Fecha o programa', click: () => app.quit()},
   ])
+
   tray.setTitle('My Money')
-  tray.setToolTip('App toolTip')
+  tray.setToolTip('My Money')
   tray.setContextMenu(contextMenu)
+  tray.addListener('click', () => {
+    mainWindow.show()
+  })
   
+  // Menu.setApplicationMenu(null);
   createWindow()
+  mainWindow.hide()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
@@ -63,13 +73,30 @@ ipcMain.handle('find-stock', async (event, url) => {
   return true;
 });
 
-ipcMain.handle('load-stocks', (event) => {
-  loadStocks();
+ipcMain.handle('load-stocks', () => {
+  return loadStocks();
 });
 
 ipcMain.handle('remove-stock', (event, id) => {
   deleteStock(id)
-})
+});
+
+ipcMain.handle('update-data', async () => {
+  const stocks = getStoredStocks();
+  let updatedStocks = [];
+  let result = null;
+  let id = 0;
+
+  for(const stock of stocks) {
+    result = await puppeteer.findStock(stock.url);
+    id++;
+    if (result) {
+      result.id = id +1;
+      updatedStocks.push(result);
+    }
+  }
+  fs.writeFileSync(databaseName, JSON.stringify(updatedStocks));
+});
 
 function storeStock(stock) {
   let fileNotFound = false;
@@ -116,9 +143,10 @@ function getStoredStocks() {
 
 function loadStocks() {
   const stocks = getStoredStocks();
-  for(const stock of stocks) {
-    updateList(stock);
-  }
+  // for(const stock of stocks) {
+  //   updateList(stock);
+  // }
+  return stocks;
 }
 
 function updateList(stock) {

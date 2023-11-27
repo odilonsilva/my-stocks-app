@@ -27,6 +27,11 @@ body {
   align-items: center;
 }
 
+.updated {
+  font-size: small;
+  margin-top: 5px;
+}
+
 .btn {
   width: 32px;
   height: 32px;
@@ -50,8 +55,9 @@ svg {
 
 .stocks {
   overflow-y: auto;
-  max-height: calc(100vh - 83px);
+  max-height: calc(100vh - 145px);
   transition: all 300ms ease;
+  margin-top: 10px;
 }
 
 .stocks::-webkit-scrollbar {
@@ -69,9 +75,9 @@ svg {
   flex-grow: 2;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgb(70, 70, 70);
-  padding: 5px 10px;
-  margin-bottom: 5px;
+  /* border-bottom: 1px solid rgb(70, 70, 70); */
+  padding: 0 10px;
+  /* margin-bottom: 5px; */
 }
 
 .card-title {
@@ -107,6 +113,7 @@ svg {
 
 .items-container {
   margin-left: -92px;
+  border-bottom: 1px solid rgb(70, 70, 70);
   transition: all 300ms ease;
 }
 
@@ -118,8 +125,9 @@ svg {
   cursor: pointer;
   display: flex;
   background-color: rgb(196, 11, 11);
-  align-items: center;
-  padding: 5px 10px;
+  /* align-items: center; */
+  padding: 0 10px;
+  /* margin-bottom: 5px; */
 }
 
 .entries-container {
@@ -180,4 +188,17 @@ svg {
   background-color: rgb(245, 140, 140);
   outline-color: rgb(215, 50, 50);
   border-color:  rgb(215, 50, 50);
+}
+
+.filters .btn.active {
+  background-color: silver;
+  color: #3c3c3c;
+  border-bottom: 1px solid rgb(70, 70, 70);
+  font-weight: 600;
+}
+
+.filters .btn {
+  margin-left: 10px;
+  width: max-content;
+  border-radius: 5px;
 }

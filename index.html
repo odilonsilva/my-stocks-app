@@ -11,17 +11,29 @@
 </head>
 <body>
     <div class="flex stocks-head">
-        <h1>
-            Cotações
-        </h1>
+        <div>
+            <h1>
+                Cotações
+                <div class="updated">
+                    Atualizado: <span id="updated_at"></span>
+                </div>
+            </h1>
+        </div>
         <button id="btn-add" class="btn btn-add" onclick="openAddStock()">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
         </button>
     </div>
+    <div class="flex filters">
+        <button class="btn active" onclick="setFilter(this,'all')">Todos</button>
+        <button class="btn" onclick="setFilter(this,'positive')">Positivos</button>
+        <button class="btn" onclick="setFilter(this,'negative')">Negativos</button>
+        <button class="btn">inativos</button>
+    </div>
     
     <div class="stocks"></div>
+
     <div class="entries-container">
         <div class="entries">
             <div class="flex flex-center">
@@ -41,6 +53,7 @@
             <button id="btn-save" class="btn-save" onclick="saveUrl()">Salvar</button>
         </div>
     </div>
+
     <script src="src/renderer.js"></script>
 </body>
 </html>

@@ -4,9 +4,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   findStock: (url) => ipcRenderer.invoke('find-stock', url),
   updateListHandler: (callback) => ipcRenderer.on('update-list', callback),
   loadStocks: () => ipcRenderer.invoke('load-stocks'),
-  deleteStock: (id) =>ipcRenderer.invoke('remove-stock', id)
+  deleteStock: (id) =>ipcRenderer.invoke('remove-stock', id),
+  updateData: () => ipcRenderer.invoke('update-data')
 })
-
-// window.addEventListener('DOMContentLoaded', () => {
-//   window.electronAPI.loadStocks();
-// })
