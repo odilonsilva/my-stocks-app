@@ -1,16 +1,15 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } = require('electron')
-const path  =  require('node:path')
+const path = require('node:path')
 const puppeteer = require('./src/puppeteer-browser')
-const fs = require('fs');
-const lodash = require('lodash')
-const databaseName = 'data/data.json';
+const { saveStock, startDb, getStocks, saveStockValue, deleteStockById } = require('./src/repository');
+
 let mainWindow;
 
-function createWindow () {
+function createWindow() {
   const primaryDisplay = screen.getPrimaryDisplay()
-  const {width, height} = primaryDisplay.workAreaSize
+  const { width, height } = primaryDisplay.workAreaSize
   const boundX = width - 400
-  
+
   mainWindow = new BrowserWindow({
     width: 400,
     height: height,
@@ -19,7 +18,7 @@ function createWindow () {
     x: boundX,
     y: 0,
     webPreferences: {
-      preload: path.join(__dirname, 'src','preload.js')
+      preload: path.join(__dirname, 'src', 'preload.js')
     }
   })
 
@@ -35,7 +34,7 @@ app.whenReady().then(() => {
   })
   const tray = new Tray(icon)
   const contextMenu = Menu.buildFromTemplate([
-    {label: 'Sair', type: 'normal', toolTip: 'Fecha o programa', click: () => app.quit()},
+    { label: 'Sair', type: 'normal', toolTip: 'Fecha o programa', click: () => app.quit() },
   ])
 
   tray.setTitle('My Money')
@@ -44,7 +43,7 @@ app.whenReady().then(() => {
   tray.addListener('click', () => {
     mainWindow.show()
   })
-  
+
   // Menu.setApplicationMenu(null);
   createWindow()
   mainWindow.hide()
@@ -69,7 +68,7 @@ ipcMain.handle('find-stock', async (event, url) => {
   storeStock(result);
 
   updateList(result);
-  
+
   return true;
 });
 
@@ -82,71 +81,30 @@ ipcMain.handle('remove-stock', (event, id) => {
 });
 
 ipcMain.handle('update-data', async () => {
-  const stocks = getStoredStocks();
-  let updatedStocks = [];
+  const stocks = await getStoredStocks();
   let result = null;
-  let id = 0;
 
-  for(const stock of stocks) {
+  for (const stock of stocks) {
     result = await puppeteer.findStock(stock.url);
-    id++;
+
     if (result) {
-      result.id = id +1;
-      updatedStocks.push(result);
+      result.id = stock.id;
+      saveStockValue(result);
     }
   }
-  fs.writeFileSync(databaseName, JSON.stringify(updatedStocks));
 });
 
 function storeStock(stock) {
-  let fileNotFound = false;
-  let file = null;
-  let lastId = 0;
-
-  try {
-    file = fs.readFileSync(databaseName, 'utf-8');
-  } catch(error) {
-    fileNotFound = true;
-  }
-  
-  let stocks = [];
-  if (!fileNotFound) {
-    stocks = JSON.parse(file);
-    lastId = stocks[stocks.length -1].id
-  }
-
-  stock.id = lastId + 1;
-  stocks.push(stock);
-
-  try {
-    fs.writeFileSync(databaseName, JSON.stringify(stocks));
-  } catch (error) {
-    console.log('write file failed');
-  }
+  saveStock(stock);
 }
 
 function getStoredStocks() {
-  let fileNotFound = false;
-  let file = null;
-  
-  try {
-    file = fs.readFileSync(databaseName, 'utf-8');
-  } catch(error) {
-    fileNotFound = true;
-  }
-
-  if (!fileNotFound) {
-    return JSON.parse(file);
-  }
-  return [];
+  startDb();
+  return getStocks();
 }
 
 function loadStocks() {
-  const stocks = getStoredStocks();
-  // for(const stock of stocks) {
-  //   updateList(stock);
-  // }
-  return stocks;
+  return getStoredStocks();
 }
 
 function updateList(stock) {
@@ -154,12 +112,5 @@ function updateList(stock) {
 }
 
 function deleteStock(id) {
-  let stocks = getStoredStocks();
-  const index = lodash.findIndex(stocks,{id: id});
-
-  if (index > -1) {
-    delete stocks[index]
-    stocks = stocks.filter((item) => item != null)
-    fs.writeFileSync(databaseName, JSON.stringify(stocks));
-  }
+  deleteStockById(id);
 }
