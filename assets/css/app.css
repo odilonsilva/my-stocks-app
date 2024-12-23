@@ -135,7 +135,7 @@ svg {
   padding: 0 10px;
 }
 
-.analise {
+.analyze {
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -214,4 +214,23 @@ svg {
   margin-left: 10px;
   width: max-content;
   border-radius: 5px;
+}
+
+.date-range-controls {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px;
+}
+
+.stocks-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stocks-info > div {
+  margin: 5px 0px;
+  display: flex;
+  flex-direction: row;
 }

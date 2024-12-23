@@ -16,7 +16,7 @@ async function saveUrl() {
   const emptyUrl = document.querySelector('#emptyUrl')
   const invalidUrl = document.querySelector('#urlError')
   const btnSave = document.querySelector('#btn-save')
-  
+
   emptyUrl.style = 'display: none'
   invalidUrl.style = 'display: none'
   input.classList.remove('input-error')
@@ -36,7 +36,7 @@ async function saveUrl() {
   btnSave.textContent = 'Carregando...';
   const result = await window.electronAPI.findStock(input.value)
   btnSave.textContent = 'Salvar';
-  
+
   if (!result) {
     invalidUrl.style = 'display: block'
     input.classList.add('input-error')
@@ -57,6 +57,12 @@ function mountStock(stock) {
         </svg>
         <p>Excluir</p>
     </div>
+    <div class="analyze" onclick="analyze(${stock.id})">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+        </svg>
+        <p>Analisar</p>
+    </div>
     <div class="card">
       <div class="card-title">${stock.title}</div>
       <div class="card-info">
@@ -68,11 +74,17 @@ function mountStock(stock) {
   stocksContainer.innerHTML += newStock;
 }
 
+function analyze(id) {
+  window.electronAPI.openAnalyze(id);
+}
+
 function remove(id) {
-  if (window.confirm('Deseja excluir esse item')){
+  if (window.confirm('Deseja excluir esse item')) {
     window.electronAPI.deleteStock(id);
-    clearStocks();
-    loadStocks();
+    setTimeout(() => {
+      clearStocks();
+      loadStocks();
+    }, 200);
   }
 }
 
@@ -89,25 +101,25 @@ window.electronAPI.updateListHandler((event, value) => {
 function setFilter(element, value) {
   const filterList = document.querySelectorAll('.filters button');
   filter = value;
-  
-  for(const filter of filterList){
+
+  for (const filter of filterList) {
     filter.classList.remove('active');
     console.log(filter)
   }
-  
+
   element.classList.add('active');
   clearStocks();
-  
+
   if (value === 'all') {
     loadStocks();
   } else if (value === 'positive') {
     const stocksLocal = stocks.filter((item) => item.status === 'positive');
-    for(const stock of stocksLocal) {
+    for (const stock of stocksLocal) {
       mountStock(stock);
     }
   } else if (value === 'negative') {
     const stocksLocal = stocks.filter((item) => item.status === 'negative');
-    for(const stock of stocksLocal) {
+    for (const stock of stocksLocal) {
       mountStock(stock);
     }
   }
@@ -115,7 +127,7 @@ function setFilter(element, value) {
 
 async function loadStocks() {
   stocks = await window.electronAPI.loadStocks();
-  for(const stock of stocks) {
+  for (const stock of stocks) {
     mountStock(stock)
   }
 }
@@ -133,5 +145,5 @@ async function updateData() {
 setInterval(updateData, 600000);
 
 loadStocks();
-updateData();
+// updateData();
 console.log('started at', (new Date()).toLocaleString())

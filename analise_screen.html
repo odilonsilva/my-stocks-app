@@ -1,0 +1,45 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Analise</title>
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="assets/css/app.css" />
+</head>
+
+<body>
+  <div class="flex stocks-head">
+    <div>
+      <h1 id="title"></h1>
+    </div>
+    <div class="stocks-info">
+      <div>
+        <b>Max:&nbsp;</b>
+        <div id="max-price" class="card-price">0</div>
+        <div id="max-percent" class="card-percent">0</div>
+      </div>
+      <div>
+        <b>Min:&nbsp;</b>
+        <div id="min-price" class="card-price">0</div>
+        <div id="min-percent" class="card-percent">0</div>
+      </div>
+      
+    </div>
+  </div>
+  <div class="date-range-controls">
+    <label for="start-date">Start Date:</label>
+    <input type="datetime-local" id="start-date" name="start-date">
+    <label for="end-date">End Date:</label>
+    <input type="datetime-local" id="end-date" name="end-date">
+    <button onclick="apply()">Aplicar</button>
+  </div>
+  <div id="main" style="width: 100%;height:400px;"></div>
+  <script src="src/libs/echarts.min.js"></script>
+  <script src="src/libs/moment.min.js"></script>
+  <script src="src/analyze_renderer.js"></script>
+</body>
+
+</html>

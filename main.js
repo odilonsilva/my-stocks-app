@@ -1,7 +1,7 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } = require('electron')
-const path = require('node:path')
-const puppeteer = require('./src/puppeteer-browser')
-const { saveStock, startDb, getStocks, saveStockValue, deleteStockById } = require('./src/repository');
+const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } = require('electron');
+const path = require('node:path');
+const puppeteer = require('./src/puppeteer-browser');
+const { saveStock, startDb, getStocks, saveStockValue, deleteStockById, getStock } = require('./src/repository');
 
 let mainWindow;
 
@@ -23,6 +23,31 @@ function createWindow() {
   })
 
   mainWindow.loadFile('index.html')
+}
+
+function createSecondaryWindow(id) {
+  secondaryWindow = new BrowserWindow({
+    width: 600,
+    height: 600,
+    frame: true,
+    parent: mainWindow, // Define a janela principal como pai
+    modal: true, // Faz a janela secundária modal
+    webPreferences: {
+      // nodeIntegration: true, 
+      preload: path.join(__dirname, 'src', 'preload.js')
+    },
+  });
+
+  secondaryWindow.loadFile('analise_screen.html'); // Carrega o arquivo secundário
+
+  // Evento para fechar a janela secundária
+  secondaryWindow.on('closed', () => {
+    secondaryWindow = null;
+  });
+
+  setTimeout(() => {
+    secondaryWindow.webContents.send(`selected-stock`, id);
+  }, 400);
 }
 
 app.whenReady().then(() => {
@@ -59,6 +84,14 @@ app.on('window-all-closed', () => {
     app.quit()
   }
 })
+
+ipcMain.handle('open-analyze', (event, id) => {
+  createSecondaryWindow(id);
+});
+
+ipcMain.handle('get-stock', async (event, data) => {
+  return await getStock(data.id, data.startDate, data.endDate);
+});
 
 ipcMain.handle('find-stock', async (event, url) => {
   const result = await puppeteer.findStock(url);

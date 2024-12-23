@@ -11,3 +11,7 @@ Full-stack project:
 - Puppeteer
 
 ![preview](preview.gif)
+
+### Analyze screen
+
+![preview2](preview2.png)
