@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="assets/css/app.css" />
+  <link rel="stylesheet" type="text/css" href="../assets/css/app.css" />
 </head>
 
 <body>
@@ -36,10 +36,13 @@
     <input type="datetime-local" id="end-date" name="end-date">
     <button onclick="apply()">Aplicar</button>
   </div>
-  <div id="main" style="width: 100%;height:400px;"></div>
-  <script src="src/libs/echarts.min.js"></script>
-  <script src="src/libs/moment.min.js"></script>
-  <script src="src/analyze_renderer.js"></script>
+  <div id="chart-main"></div>
+  <div id="loading">
+    <h3>Loading...</h3>
+  </div>
+  <script src="../src/libs/echarts.min.js"></script>
+  <script src="../src/libs/moment.min.js"></script>
+  <script src="../src/analyze_renderer.js"></script>
 </body>
 
 </html>

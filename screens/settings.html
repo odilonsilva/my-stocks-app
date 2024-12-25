@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings</title>
+  <link rel="stylesheet" type="text/css" href="../assets/css/app.css" />
+  <style>
+    body {
+      margin: 10px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    select {
+      margin: 5px 0px;
+      padding: 5px;
+      width: 50%;
+      height: 40px;
+      font-size: 20px;
+      line-height: 20px;
+    }
+
+    label {
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .switch {
+      margin: 5px 0px;
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    input:checked+.slider {
+      background-color: #2196F3;
+    }
+
+    input:focus+.slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked+.slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Settings</h1>
+  <div class="form-group">
+    <label for="refresh-interval">Refresh Interval (minutes):</label>
+    <select id="refresh-interval">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="15">15</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <div>
+      <label for="update-on-startup">
+        Update on Startup
+      </label>
+    </div>
+    <label class="switch">
+      <input id="update-on-startup" type="checkbox" checked>
+      <span class="slider round"></span>
+    </label>
+  </div>
+  <div class="form-group">
+    <div>
+      <label for="analyze-custom-color">
+        Analyze Custom Color
+      </label>
+    </div>
+    <label class="switch">
+      <input id="analyze-custom-color" type="checkbox" checked>
+      <span class="slider round"></span>
+    </label>
+  </div>
+  <button onclick="saveSettings()">Save</button>
+  <script src="../src/settings_renderer.js"></script>
+</body>
+
+</html>

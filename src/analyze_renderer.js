@@ -1,31 +1,33 @@
+var chartDom = document.getElementById('chart-main');
+var loadingContainer = document.getElementById('loading');
+var stockInfoContainer = document.querySelector('.stocks-info');
 
-var chartDom = document.getElementById('main');
-var myChart = echarts.init(chartDom);
 const startDateField = document.getElementById('start-date');
 const endDateField = document.getElementById('end-date');
-
 let stockId = null;
+let analyzeCustomColor = true;
 
 window.electronAPI.onMessage(async (event, id) => {
   stockId = id;
   const startDate = moment().startOf('day');
-  const endDate = moment();
-
+  const endDate = moment().endOf('day');
+  
   startDateField.value = startDate.format('YYYY-MM-DD HH:mm');
   endDateField.value = endDate.format('YYYY-MM-DD HH:mm');
-
+  
   const data = await window.electronAPI.getStock({
     id,
     startDate: startDate.toDate(),
     endDate: endDate.toDate()
   });
-
+  
   document.getElementById('title').innerText = data.stock.title;
   document.title = `Analise - ${data.stock.title}`;
-  mountChart(data);
+  apply();
 });
 
 function mountChart(data) {
+  var myChart = echarts.init(chartDom);
   var option = {
     tooltip: {
       triggerOn: 'mousemove|click',
@@ -56,15 +58,16 @@ function mountChart(data) {
     option.xAxis.data.push(moment(element.created_at).format(`DD/MM/YYYY HH:mm`));
   });
 
-  const lastStatus = data.stockValues[data.stockValues.length - 1].status;
-  lastStatus === 'positive' ? option.color = ['#67C23Aaf'] :  option.color = ['#FF5f5faf'];
+  if (analyzeCustomColor) {
+    const lastStatus = data.stockValues[data.stockValues.length - 1].status;
+    lastStatus === 'positive' ? option.color = ['#67C23Aaf'] : option.color = ['#FF5f5faf'];
+  }
 
-  const max = parseInt(data.stock.max);
-  const min = parseInt(data.stock.min);
+  const max = isNaN(parseInt(data.stock.max)) ? 0 : parseInt(data.stock.max);
+  const min = isNaN(parseInt(data.stock.min)) ? 0 : parseInt(data.stock.min);
+
   option.yAxis.max = max + 10;
   option.yAxis.min = (min - 10) < 0 ? 0 : min - 10;
-  // option.yAxis.max = max + (max * 0.1);
-  // option.yAxis.min = min - (min * 0.1);
 
   document.getElementById('max-price').innerText = `R$ ${data.stock.max}`;
   document.getElementById('min-price').innerText = `R$ ${data.stock.min}`;
@@ -86,5 +89,23 @@ async function apply() {
   const startDate = moment(startDateField.value).toDate();
   const endDate = moment(endDateField.value).toDate();
   const data = await window.electronAPI.getStock({ id: stockId, startDate, endDate });
+
+  if (data.stockValues.length === 0) {
+    loadingContainer.innerHTML = '<h3>Não há dados para exibir</h3>';
+    loadingContainer.style.display = 'flex';
+    chartDom.style.display = 'none';
+    stockInfoContainer.style.display = 'none';
+    return;
+  }
+  
+  loadingContainer.style.display = 'none';
+  chartDom.style.display = 'flex';
+  stockInfoContainer.style.display = 'flex';
+  
   mountChart(data);
+}
+
+window.onload = async () => {
+  const settings = await window.electronAPI.loadSettings();
+  analyzeCustomColor = settings.analyze_custom_color === 1;
 }

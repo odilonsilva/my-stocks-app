@@ -1,7 +1,16 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } = require('electron');
 const path = require('node:path');
 const puppeteer = require('./src/puppeteer-browser');
-const { saveStock, startDb, getStocks, saveStockValue, deleteStockById, getStock } = require('./src/repository');
+const { 
+  saveStock, 
+  startDb,
+  getStocks,
+  saveStockValue,
+  deleteStockById,
+  getStock,
+  loadSettings,
+  saveSettings
+ } = require('./src/repository');
 
 let mainWindow;
 
@@ -22,11 +31,12 @@ function createWindow() {
     }
   })
 
-  mainWindow.loadFile('index.html')
+  startDb();
+  mainWindow.loadFile(path.join(__dirname, 'screens', 'index.html'));
 }
 
-function createSecondaryWindow(id) {
-  secondaryWindow = new BrowserWindow({
+function createAnalyzeWindow(id) {
+  analyzeWindow = new BrowserWindow({
     width: 600,
     height: 600,
     frame: true,
@@ -38,16 +48,39 @@ function createSecondaryWindow(id) {
     },
   });
 
-  secondaryWindow.loadFile('analise_screen.html'); // Carrega o arquivo secundário
+  analyzeWindow.loadFile(path.join(__dirname, 'screens', 'analyze.html')); // Carrega o arquivo secundário
 
   // Evento para fechar a janela secundária
-  secondaryWindow.on('closed', () => {
-    secondaryWindow = null;
+  analyzeWindow.on('closed', () => {
+    analyzeWindow = null;
   });
 
   setTimeout(() => {
-    secondaryWindow.webContents.send(`selected-stock`, id);
+    analyzeWindow.webContents.send(`selected-stock`, id);
   }, 400);
+}
+
+function createSettingWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay()
+  const { width, height } = primaryDisplay.workAreaSize
+  const boundX = width - 400
+
+  settingWindow = new BrowserWindow({
+    width: 400,
+    height: height,
+    alwaysOnTop: false,
+    frame: false,
+    movable: false,
+    modal: true,
+    x: boundX,
+    y: 0,
+    parent: mainWindow,
+    webPreferences: {
+      preload: path.join(__dirname, 'src', 'preload.js')
+    }
+  })
+
+  settingWindow.loadFile(path.join(__dirname, 'screens', 'settings.html'));
 }
 
 app.whenReady().then(() => {
@@ -85,8 +118,20 @@ app.on('window-all-closed', () => {
   }
 })
 
+ipcMain.handle('open-settings', (event) => {
+  createSettingWindow();
+});
+
+ipcMain.handle('load-settings', async (event) => {
+  return await loadSettings();
+});
+
+ipcMain.handle('save-settings', (event, settings) => {
+  return saveSettings(settings);
+});
+
 ipcMain.handle('open-analyze', (event, id) => {
-  createSecondaryWindow(id);
+  createAnalyzeWindow(id);
 });
 
 ipcMain.handle('get-stock', async (event, data) => {
@@ -114,7 +159,7 @@ ipcMain.handle('remove-stock', (event, id) => {
 });
 
 ipcMain.handle('update-data', async () => {
-  const stocks = await getStoredStocks();
+  const stocks = await loadStocks();
   let result = null;
 
   for (const stock of stocks) {
@@ -131,13 +176,8 @@ function storeStock(stock) {
   saveStock(stock);
 }
 
-function getStoredStocks() {
-  startDb();
-  return getStocks();
-}
-
 function loadStocks() {
-  return getStoredStocks();
+  return getStocks();
 }
 
 function updateList(stock) {

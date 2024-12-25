@@ -4,7 +4,7 @@ function openDB() {
   return new sqlite.Database('data/database.db');
 }
 
-exports.startDb = () => {
+async function startDb() {
   const db = openDB();
   db.exec(`CREATE TABLE IF NOT EXISTS stocks 
     (
@@ -26,10 +26,29 @@ exports.startDb = () => {
     )`
   );
 
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_stocks_values_stockId ON stocks_values (stockId)`); // index    
+
+  db.exec(`CREATE TABLE IF NOT EXISTS settings 
+    (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      refresh_interval INTEGER DEFAULT 5,
+      update_on_startup BOOLEAN DEFAULT 0,
+      analyze_custom_color BOOLEAN DEFAULT 1
+    );`
+  );
+
+  if (await loadSettings() === undefined) {
+    await saveSettings({
+      refreshInterval: 5,
+      updateOnStartup: 1,
+      analyzeCustomColor: 1
+    });
+  }
+
   db.close();
 }
 
-exports.saveStock = (stock) => {
+function saveStock(stock) {
   console.log(`saveStock`, stock);
   const db = openDB();
 
@@ -48,7 +67,7 @@ exports.saveStock = (stock) => {
   this.saveStockValue(stock);
 }
 
-exports.saveStockValue = (stock) => {
+function saveStockValue(stock) {
   console.log(`saveStockValue`, stock)
 
   const db = openDB();
@@ -66,7 +85,7 @@ exports.saveStockValue = (stock) => {
   db.close();
 }
 
-exports.getStocks = async () => {
+async function getStocks() {
   const db = openDB();
 
   const stocks = await new Promise((resolve, reject) => {
@@ -97,7 +116,7 @@ exports.getStocks = async () => {
   return stocks;
 }
 
-exports.deleteStockById = (stockId) => {
+function deleteStockById(stockId) {
   console.log(`deleteStockById`, stockId)
 
   const db = openDB();
@@ -115,7 +134,7 @@ exports.deleteStockById = (stockId) => {
   db.close();
 }
 
-exports.getStock = async (id, startDate, endDate) => {
+async function getStock(id, startDate, endDate) {
   const db = openDB();
 
   const stock = await new Promise((resolve, reject) => {
@@ -166,4 +185,54 @@ exports.getStock = async (id, startDate, endDate) => {
     stock,
     stockValues
   };
+}
+
+async function saveSettings(settings) {
+  const db = openDB();
+  await new Promise((resolve, reject) => {
+    db.run(`DELETE FROM settings WHERE id > 0;`, [], function (err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+    db.run(`INSERT INTO settings (refresh_interval, update_on_startup, analyze_custom_color) VALUES (?, ?, ?)`,
+      [settings.refreshInterval, settings.updateOnStartup, settings.analyzeCustomColor],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+  });
+  db.close();
+}
+
+async function loadSettings() {
+  const db = openDB();
+  const data = await new Promise((resolve, reject) => {
+    db.get(`SELECT refresh_interval, update_on_startup, analyze_custom_color FROM settings ORDER BY id DESC LIMIT 1`,
+      (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row);
+        }
+      });
+  });
+  db.close();
+  return data;
+}
+
+module.exports = {
+  startDb,
+  saveStock,
+  saveStockValue,
+  getStocks,
+  deleteStockById,
+  getStock,
+  saveSettings,
+  loadSettings
 }

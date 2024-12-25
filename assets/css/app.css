@@ -95,6 +95,7 @@ svg {
 .card-price {
   margin-right: 10px;
 }
+
 .card-percent {
   font-weight: 500;
   margin-top: -5px;
@@ -104,9 +105,11 @@ svg {
   text-align: center;
   color: #fff;
 }
+
 .card-percent.positive {
   background-color: rgb(8, 191, 8);
 }
+
 .card-percent.negative {
   background-color: rgb(196, 11, 11);
 }
@@ -193,14 +196,14 @@ svg {
 
 .error {
   display: none;
-  color:  rgb(240, 70, 70);
+  color: rgb(240, 70, 70);
 }
 
 .input-error {
-  color:  #fff;
+  color: #fff;
   background-color: rgb(245, 140, 140);
   outline-color: rgb(215, 50, 50);
-  border-color:  rgb(215, 50, 50);
+  border-color: rgb(215, 50, 50);
 }
 
 .filters .btn.active {
@@ -223,14 +226,26 @@ svg {
 }
 
 .stocks-info {
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
 }
 
-.stocks-info > div {
+.stocks-info>div {
   margin: 5px 0px;
   display: flex;
   flex-direction: row;
+}
+
+#loading,
+#chart-main {
+  display: none;
+  justify-content: center;
+  height: 400px;
+  transition: all 300ms ease;
+}
+
+#loading {
+  display: flex;
 }

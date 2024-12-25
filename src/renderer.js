@@ -74,6 +74,10 @@ function mountStock(stock) {
   stocksContainer.innerHTML += newStock;
 }
 
+function settings() {
+  window.electronAPI.openSettings();
+}
+
 function analyze(id) {
   window.electronAPI.openAnalyze(id);
 }
@@ -141,9 +145,14 @@ async function updateData() {
   clearStocks();
   setFilter(selectedElement, filter);
 }
-//a cada 10 min
-setInterval(updateData, 600000);
 
-loadStocks();
-// updateData();
-console.log('started at', (new Date()).toLocaleString())
+window.onload = async function () {
+  const settings = await window.electronAPI.loadSettings();
+  
+  loadStocks();
+  
+  setInterval(updateData, 1000 * 60 * settings.refresh_interval);
+  
+  if (settings.update_on_startup === 1)
+    updateData();
+}

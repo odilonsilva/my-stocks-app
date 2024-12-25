@@ -9,4 +9,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openAnalyze: (id) => ipcRenderer.invoke('open-analyze', id),
   getStock: (data) => ipcRenderer.invoke('get-stock', data),
   onMessage: (callback) => ipcRenderer.on('selected-stock', callback),
+  openSettings: () => ipcRenderer.invoke('open-settings'),
+  loadSettings: () => ipcRenderer.invoke('load-settings'),
+  saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
 });
