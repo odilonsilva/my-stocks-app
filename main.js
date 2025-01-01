@@ -1,8 +1,8 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } = require('electron');
 const path = require('node:path');
 const puppeteer = require('./src/puppeteer-browser');
-const { 
-  saveStock, 
+const {
+  saveStock,
   startDb,
   getStocks,
   saveStockValue,
@@ -10,7 +10,7 @@ const {
   getStock,
   loadSettings,
   saveSettings
- } = require('./src/repository');
+} = require('./src/repository');
 
 let mainWindow;
 
@@ -20,6 +20,7 @@ function createWindow() {
   const boundX = width - 400
 
   mainWindow = new BrowserWindow({
+    id: 'mainWindow',
     width: 400,
     height: height,
     alwaysOnTop: false,
@@ -37,6 +38,7 @@ function createWindow() {
 
 function createAnalyzeWindow(id) {
   analyzeWindow = new BrowserWindow({
+    id: 'analyzeWindow',
     width: 600,
     height: 600,
     frame: true,
@@ -66,6 +68,7 @@ function createSettingWindow() {
   const boundX = width - 400
 
   settingWindow = new BrowserWindow({
+    id: 'settingWindow',
     width: 400,
     height: height,
     alwaysOnTop: false,
@@ -100,11 +103,20 @@ app.whenReady().then(() => {
   tray.setContextMenu(contextMenu)
   tray.addListener('click', () => {
     mainWindow.show()
-  })
+  });
 
-  // Menu.setApplicationMenu(null);
-  createWindow()
-  mainWindow.hide()
+  createWindow();
+  mainWindow.hide();
+
+  app.on('browser-window-blur', () => {
+    const windowOpened = BrowserWindow.getAllWindows().some((window) => {
+      return window.isVisible() && window.id !== mainWindow.id;
+    });
+
+    if (!windowOpened)
+      mainWindow.hide();
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow()
@@ -127,7 +139,10 @@ ipcMain.handle('load-settings', async (event) => {
 });
 
 ipcMain.handle('save-settings', (event, settings) => {
-  return saveSettings(settings);
+  if (!settings) return;
+  mainWindow.webContents.send('update-interval', settings.refreshInterval);
+  mainWindow.show();
+  saveSettings(settings);
 });
 
 ipcMain.handle('open-analyze', (event, id) => {

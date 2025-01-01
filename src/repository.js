@@ -64,7 +64,7 @@ function saveStock(stock) {
 
   insertStock.finalize();
   db.close();
-  this.saveStockValue(stock);
+  saveStockValue(stock);
 }
 
 function saveStockValue(stock) {

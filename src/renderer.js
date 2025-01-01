@@ -1,5 +1,6 @@
 let stocks = [];
 let filter = 'all';
+let interval;
 
 function openAddStock() {
   const backdrop = document.querySelector('.entries-container')
@@ -105,32 +106,34 @@ window.electronAPI.updateListHandler((event, value) => {
 function setFilter(element, value) {
   const filterList = document.querySelectorAll('.filters button');
   filter = value;
+  let stocksLocal;
 
-  for (const filter of filterList) {
+  for (const filter of filterList)
     filter.classList.remove('active');
-    console.log(filter)
-  }
 
   element.classList.add('active');
   clearStocks();
 
   if (value === 'all') {
     loadStocks();
+    return;
   } else if (value === 'positive') {
-    const stocksLocal = stocks.filter((item) => item.status === 'positive');
-    for (const stock of stocksLocal) {
-      mountStock(stock);
-    }
+    stocksLocal = stocks.filter((item) => item.status === 'positive');
   } else if (value === 'negative') {
-    const stocksLocal = stocks.filter((item) => item.status === 'negative');
-    for (const stock of stocksLocal) {
-      mountStock(stock);
-    }
+    stocksLocal = stocks.filter((item) => item.status === 'negative');
+  }
+
+  for (const stock of stocksLocal) {
+    mountStock(stock);
   }
 }
 
 async function loadStocks() {
   stocks = await window.electronAPI.loadStocks();
+  
+  if (stocks.length === 0)
+    openAddStock();
+
   for (const stock of stocks) {
     mountStock(stock)
   }
@@ -146,13 +149,18 @@ async function updateData() {
   setFilter(selectedElement, filter);
 }
 
+window.electronAPI.updateInterval(async (event, value) => {
+  clearInterval(interval);
+  interval = setInterval(updateData, 1000 * 60 * value);
+});
+
 window.onload = async function () {
   const settings = await window.electronAPI.loadSettings();
-  
+
   loadStocks();
-  
-  setInterval(updateData, 1000 * 60 * settings.refresh_interval);
-  
+
+  interval = setInterval(updateData, 1000 * 60 * settings.refresh_interval);
+
   if (settings.update_on_startup === 1)
     updateData();
 }

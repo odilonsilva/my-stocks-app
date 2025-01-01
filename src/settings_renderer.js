@@ -13,6 +13,11 @@ function saveSettings() {
   window.close();
 }
 
+function cancelSettings() {
+  window.electronAPI.saveSettings(null);
+  window.close();
+}
+
 // Load settings on startup
 window.onload = async function () {
   let settings = await window.electronAPI.loadSettings();
