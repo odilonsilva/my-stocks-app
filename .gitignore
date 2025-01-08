@@ -2,3 +2,5 @@ node_modules
 *-lock.json
 data/
 out/
+dist/
+*.log

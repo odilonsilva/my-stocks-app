@@ -7,7 +7,7 @@
   <title>Settings</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="../assets/css/app.css" />
+  <link rel="stylesheet" type="text/css" href="../src/css/app.css" />
   <style>
     body {
       margin: 10px;
@@ -15,11 +15,24 @@
 
     button {
       margin-top: 10px;
-      padding: 10px;
+      padding: 15px;
       background-color: #4CAF50;
       color: white;
       border: none;
       cursor: pointer;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    button.secondary {
+      background-color: #797979;
+    }
+    
+    button:hover {
+      background-color: #56c95b;
+    }
+    
+    button.secondary:hover {
+      background-color: #909090;
     }
 
     select {
@@ -32,6 +45,8 @@
     }
 
     label {
+      display: block;
+      width: 100%;
       font-weight: 600;
     }
 
@@ -135,7 +150,7 @@
     </label>
   </div>
   <button onclick="saveSettings()">Save</button>
-  <button onclick="cancelSettings()">Cancel</button>
+  <button class="secondary" onclick="cancelSettings()">Cancel</button>
   <script src="../src/settings_renderer.js"></script>
 </body>
 

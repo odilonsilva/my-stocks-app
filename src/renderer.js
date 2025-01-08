@@ -68,7 +68,7 @@ function mountStock(stock) {
       <div class="card-title">${stock.title}</div>
       <div class="card-info">
         <div class="card-price">${stock.value}</div>
-        <div class="card-percent ${stock.status}">${stock.percentage}</div>
+        <div class="card-percent ${stock.status}">${showSignal(stock)} ${stock.percentage}%</div>
       </div>
     </div>
   </div>`;
@@ -114,13 +114,22 @@ function setFilter(element, value) {
   element.classList.add('active');
   clearStocks();
 
-  if (value === 'all') {
-    loadStocks();
-    return;
-  } else if (value === 'positive') {
-    stocksLocal = stocks.filter((item) => item.status === 'positive');
-  } else if (value === 'negative') {
-    stocksLocal = stocks.filter((item) => item.status === 'negative');
+  switch (value) {
+    case 'all':
+      loadStocks();
+      return;
+    case 'positive':
+      stocksLocal = stocks.filter((item) => item.status === 'positive');
+      break;
+    case 'negative':
+      stocksLocal = stocks.filter((item) => item.status === 'negative');
+      break;
+    case 'neutral':
+      stocksLocal = stocks.filter((item) => item.status === 'neutral');
+      break;
+    case 'fii':
+      stocksLocal = stocks.filter((item) => item.url.includes('fii'));
+      break;
   }
 
   for (const stock of stocksLocal) {
@@ -142,11 +151,27 @@ async function loadStocks() {
 async function updateData() {
   console.log(`updated at`, (new Date()).toLocaleString())
   const selectedElement = document.querySelector('.filters button.active');
-
+  const buttonUpdate = document.getElementById('btn-update');
+  buttonUpdate.classList.add('disabled');
+  buttonUpdate.attributes.disabled = true;
+  
   await window.electronAPI.updateData();
-
+  
   clearStocks();
   setFilter(selectedElement, filter);
+
+  buttonUpdate.classList.remove('disabled');
+  buttonUpdate.attributes.disabled = false;
+}
+
+function showSignal(stocks) {
+  if (stocks.status === 'positive') {
+    return '+';
+  } else if (stocks.status === 'negative') {
+    return '-';
+  } else { 
+    return '';
+   }
 }
 
 window.electronAPI.updateInterval(async (event, value) => {

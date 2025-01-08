@@ -47,7 +47,7 @@ function mountChart(data) {
       {
         data: [],
         type: 'line',
-        smooth: true,
+        smooth: false,
         areaStyle: {}
       }
     ]
@@ -60,7 +60,13 @@ function mountChart(data) {
 
   if (analyzeCustomColor) {
     const lastStatus = data.stockValues[data.stockValues.length - 1].status;
-    lastStatus === 'positive' ? option.color = ['#67C23Aaf'] : option.color = ['#FF5f5faf'];
+    if(lastStatus === 'positive') {
+      option.color = ['#67C23Aaf'];
+    } else if(lastStatus === 'negative') {
+      option.color = ['#FF5f5faf'];
+    } else {
+      option.color = ['#f1a20eaf'];
+    }
   }
 
   const max = isNaN(parseInt(data.stock.max)) ? 0 : parseInt(data.stock.max);
@@ -73,14 +79,14 @@ function mountChart(data) {
   document.getElementById('min-price').innerText = `R$ ${data.stock.min}`;
 
   const maxPercentage = document.getElementById('max-percent');
-  maxPercentage.innerText = data.stock.maxPercentage;
-  maxPercentage.classList.remove('positive', 'negative');
-  maxPercentage.classList.add(data.stock.maxPercentageStatus === 'positive' ? 'positive' : 'negative');
+  maxPercentage.innerText = `${data.stock.maxPercentage}%`;
+  maxPercentage.classList.remove('positive', 'negative', 'neutral');
+  maxPercentage.classList.add(data.stock.maxPercentageStatus);
 
   const minPercentage = document.getElementById('min-percent');
-  minPercentage.innerText = data.stock.minPercentage;
-  minPercentage.classList.remove('positive', 'negative');
-  minPercentage.classList.add(data.stock.minPercentageStatus === 'positive' ? 'positive' : 'negative');
+  minPercentage.innerText = `${data.stock.minPercentage}%`;
+  minPercentage.classList.remove('positive', 'negative', 'neutral');
+  minPercentage.classList.add(data.stock.minPercentageStatus);
 
   option && myChart.setOption(option);
 }

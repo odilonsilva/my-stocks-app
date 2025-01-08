@@ -1,10 +1,34 @@
-const sqlite = require('sqlite3').verbose();
+const sqlite = require("sqlite3").verbose();
+const fs = require("node:fs");
+const { logger, LOG_TYPE_ERROR } = require("./logger");
 
 function openDB() {
-  return new sqlite.Database('data/database.db');
+  return new sqlite.Database("./data/database.db", (err) => {
+    if (err) {
+      logger(`[openDB] erro ao abrir banco de dados. ${err}`, LOG_TYPE_ERROR);
+    }
+  });
 }
 
 async function startDb() {
+  logger(`[startDb] Iniciando aplicação.`);
+
+  const dbPath = "./data";
+  if (!fs.existsSync(`${dbPath}/database.db`)) {
+    await new Promise((resolve, reject) => {
+      fs.mkdir(dbPath, { mode: 777 }, (err) => {
+        if (err) {
+          logger(
+            `[startDb] erro ao criar diretório de banco de dados. ${err}`,
+            LOG_TYPE_ERROR
+          );
+          reject(`[startDb] erro ao criar diretório de banco de dados. ${err}`);
+        }
+        resolve();
+      });
+    });
+  }
+
   const db = openDB();
   db.exec(`CREATE TABLE IF NOT EXISTS stocks 
     (
@@ -13,8 +37,7 @@ async function startDb() {
       title TEXT,
       created_at DATE,
       deleted_at DATE
-    )`
-  );
+    )`);
   db.exec(`CREATE TABLE IF NOT EXISTS stocks_values 
     (
       id INTEGER PRIMARY KEY,
@@ -23,10 +46,11 @@ async function startDb() {
       percentage TEXT,
       status TEXT,
       created_at DATE
-    )`
-  );
+    )`);
 
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_stocks_values_stockId ON stocks_values (stockId)`); // index    
+  db.exec(
+    `CREATE INDEX IF NOT EXISTS idx_stocks_values_stockId ON stocks_values (stockId)`
+  ); // index
 
   db.exec(`CREATE TABLE IF NOT EXISTS settings 
     (
@@ -34,29 +58,38 @@ async function startDb() {
       refresh_interval INTEGER DEFAULT 5,
       update_on_startup BOOLEAN DEFAULT 0,
       analyze_custom_color BOOLEAN DEFAULT 1
-    );`
-  );
-
-  if (await loadSettings() === undefined) {
-    await saveSettings({
-      refreshInterval: 5,
-      updateOnStartup: 1,
-      analyzeCustomColor: 1
-    });
-  }
+    );`);
 
   db.close();
+
+  try {
+    if ((await loadSettings()) === undefined) {
+      logger(`[startDb] Criando configurações padrão.`);
+      await saveSettings({
+        refreshInterval: 5,
+        updateOnStartup: 1,
+        analyzeCustomColor: 1,
+      });
+    }
+  } catch (err) {
+    logger(
+      `[startDb] erro ao criar configurações padrão. ${err}`,
+      LOG_TYPE_ERROR
+    );
+  }
 }
 
 function saveStock(stock) {
-  console.log(`saveStock`, stock);
+  logger(`[saveStock] ${stock.id} - ${stock.title}`);
   const db = openDB();
 
-  const insertStock = db.prepare(`INSERT INTO stocks (url, title, created_at) values (?, ?, ?)`);
+  const insertStock = db.prepare(
+    `INSERT INTO stocks (url, title, created_at) values (?, ?, ?)`
+  );
 
   insertStock.run(stock.url, stock.title, stock.updated_at, function (err) {
     if (err) {
-      console.error(`[saveStock] erro ao inserir. ${err.message}`);
+      logger(`[saveStock] erro ao inserir. ${err.message}`, LOG_TYPE_ERROR);
       return;
     }
     stock.id = this.lastID;
@@ -68,18 +101,28 @@ function saveStock(stock) {
 }
 
 function saveStockValue(stock) {
-  console.log(`saveStockValue`, stock)
-
   const db = openDB();
 
-  const insert = db.prepare(`INSERT INTO stocks_values (stockId, value, percentage, status, created_at) values (?, ?, ?, ?, ?)`);
+  const insert = db.prepare(
+    `INSERT INTO stocks_values (stockId, value, percentage, status, created_at) values (?, ?, ?, ?, ?)`
+  );
 
-  insert.run(stock.id, stock.value, stock.percentage, stock.status, stock.updated_at, function (err) {
-    if (err) {
-      console.error(`[saveStockValue] erro ao inserir. ${err.message}`);
-      return;
+  insert.run(
+    stock.id,
+    stock.value,
+    stock.percentage,
+    stock.status,
+    stock.updated_at,
+    function (err) {
+      if (err) {
+        logger(
+          `[saveStockValue] erro ao inserir. ${err.message}`,
+          LOG_TYPE_ERROR
+        );
+        return;
+      }
     }
-  });
+  );
 
   insert.finalize();
   db.close();
@@ -89,7 +132,8 @@ async function getStocks() {
   const db = openDB();
 
   const stocks = await new Promise((resolve, reject) => {
-    db.all(`SELECT 
+    db.all(
+      `SELECT 
       st.*,
       stv.percentage,
       stv.status,
@@ -104,20 +148,27 @@ async function getStocks() {
       ) stv ON stv.stockId = st.id
       WHERE st.deleted_at IS NULL
       GROUP BY st.id
-      ORDER BY st.id ASC;`, [], function (error, rows) {
-      if (error)
-        reject(`[getStocks] erro ao buscar. ${err.message}`);
+      ORDER BY st.id ASC;`,
+      [],
+      function (error, rows) {
+        if (error) {
+          logger(
+            `[getStocks] erro ao buscar. ${error.message}`,
+            LOG_TYPE_ERROR
+          );
+          reject(`[getStocks] erro ao buscar. ${err.message}`);
+        }
 
-      resolve(rows);
-    })
+        resolve(rows);
+      }
+    );
   });
   db.close();
-  // console.log(stocks);
   return stocks;
 }
 
 function deleteStockById(stockId) {
-  console.log(`deleteStockById`, stockId)
+  logger(`deleteStockById: ${stockId}`);
 
   const db = openDB();
 
@@ -125,7 +176,10 @@ function deleteStockById(stockId) {
 
   deleteStock.run(new Date(), stockId, function (err) {
     if (err) {
-      console.error(`[deleteStockById] erro ao excluir stock. ${err.message}`);
+      logger(
+        `[deleteStockById] erro ao excluir stock. ${err.message}`,
+        LOG_TYPE_ERROR
+      );
       return;
     }
   });
@@ -138,7 +192,8 @@ async function getStock(id, startDate, endDate) {
   const db = openDB();
 
   const stock = await new Promise((resolve, reject) => {
-    db.get(`SELECT
+    db.get(
+      `SELECT
             st.*,
             stv.max,
             stv.min,
@@ -162,6 +217,7 @@ async function getStock(id, startDate, endDate) {
       { $startDate: startDate, $endDate: endDate, $id: id },
       function (error, rows) {
         if (error) {
+          logger(`[getStock] erro ao buscar. ${error.message}`, LOG_TYPE_ERROR);
           reject(`[getStock] erro ao buscar. ${error.message}`);
         }
         resolve(rows);
@@ -170,20 +226,25 @@ async function getStock(id, startDate, endDate) {
   });
 
   const stockValues = await new Promise((resolve, reject) => {
-    db.all(`SELECT * FROM stocks_values 
+    db.all(
+      `SELECT * FROM stocks_values 
         WHERE stockId = $id AND (created_at BETWEEN $startDate AND $endDate );`,
-      { $id: id, $startDate: startDate, $endDate: endDate }, function (error, rows) {
-        if (error)
+      { $id: id, $startDate: startDate, $endDate: endDate },
+      function (error, rows) {
+        if (error) {
+          logger(`[getStock] erro ao buscar. ${error.message}`, LOG_TYPE_ERROR);
           reject(`[getStock] erro ao buscar. ${err.message}`);
+        }
 
         resolve(rows);
-      })
+      }
+    );
   });
   db.close();
 
   return {
     stock,
-    stockValues
+    stockValues,
   };
 }
 
@@ -192,20 +253,34 @@ async function saveSettings(settings) {
   await new Promise((resolve, reject) => {
     db.run(`DELETE FROM settings WHERE id > 0;`, [], function (err) {
       if (err) {
+        logger(
+          `[saveSettings] erro ao deletar. ${err.message}`,
+          LOG_TYPE_ERROR
+        );
         reject(err);
       } else {
         resolve();
       }
     });
-    db.run(`INSERT INTO settings (refresh_interval, update_on_startup, analyze_custom_color) VALUES (?, ?, ?)`,
-      [settings.refreshInterval, settings.updateOnStartup, settings.analyzeCustomColor],
+    db.run(
+      `INSERT INTO settings (refresh_interval, update_on_startup, analyze_custom_color) VALUES (?, ?, ?)`,
+      [
+        settings.refreshInterval,
+        settings.updateOnStartup,
+        settings.analyzeCustomColor,
+      ],
       function (err) {
         if (err) {
+          logger(
+            `[saveSettings] erro ao inserir. ${err.message}`,
+            LOG_TYPE_ERROR
+          );
           reject(err);
         } else {
           resolve();
         }
-      });
+      }
+    );
   });
   db.close();
 }
@@ -213,14 +288,20 @@ async function saveSettings(settings) {
 async function loadSettings() {
   const db = openDB();
   const data = await new Promise((resolve, reject) => {
-    db.get(`SELECT refresh_interval, update_on_startup, analyze_custom_color FROM settings ORDER BY id DESC LIMIT 1`,
+    db.get(
+      `SELECT refresh_interval, update_on_startup, analyze_custom_color FROM settings ORDER BY id DESC LIMIT 1`,
       (err, row) => {
         if (err) {
+          logger(
+            `[loadSettings] erro ao buscar. ${err.message}`,
+            LOG_TYPE_ERROR
+          );
           reject(err);
         } else {
           resolve(row);
         }
-      });
+      }
+    );
   });
   db.close();
   return data;
@@ -234,5 +315,5 @@ module.exports = {
   deleteStockById,
   getStock,
   saveSettings,
-  loadSettings
-}
+  loadSettings,
+};

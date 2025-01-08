@@ -1,6 +1,16 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain } = require('electron');
-const path = require('node:path');
-const puppeteer = require('./src/puppeteer-browser');
+const {
+  app,
+  BrowserWindow,
+  Tray,
+  Menu,
+  nativeImage,
+  screen,
+  ipcMain,
+} = require("electron");
+const path = require("node:path");
+const { logger } = require("./src/logger");
+require("dotenv").config();
+const puppeteer = require(path.join(__dirname, "src", "puppeteer-browser"));
 const {
   saveStock,
   startDb,
@@ -9,18 +19,18 @@ const {
   deleteStockById,
   getStock,
   loadSettings,
-  saveSettings
-} = require('./src/repository');
+  saveSettings,
+} = require(path.join(__dirname, "src", "repository"));
 
 let mainWindow;
 
 function createWindow() {
-  const primaryDisplay = screen.getPrimaryDisplay()
-  const { width, height } = primaryDisplay.workAreaSize
-  const boundX = width - 400
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+  const boundX = width - 400;
 
   mainWindow = new BrowserWindow({
-    id: 'mainWindow',
+    id: "mainWindow",
     width: 400,
     height: height,
     alwaysOnTop: false,
@@ -28,32 +38,31 @@ function createWindow() {
     x: boundX,
     y: 0,
     webPreferences: {
-      preload: path.join(__dirname, 'src', 'preload.js')
-    }
-  })
+      preload: path.join(__dirname, "src", "preload.js"),
+    },
+  });
 
-  startDb();
-  mainWindow.loadFile(path.join(__dirname, 'screens', 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, "screens", "index.html"));
 }
 
 function createAnalyzeWindow(id) {
   analyzeWindow = new BrowserWindow({
-    id: 'analyzeWindow',
-    width: 600,
+    id: "analyzeWindow",
+    width: 680,
     height: 600,
     frame: true,
     parent: mainWindow, // Define a janela principal como pai
     modal: true, // Faz a janela secundária modal
     webPreferences: {
-      // nodeIntegration: true, 
-      preload: path.join(__dirname, 'src', 'preload.js')
+      // nodeIntegration: true,
+      preload: path.join(__dirname, "src", "preload.js"),
     },
   });
 
-  analyzeWindow.loadFile(path.join(__dirname, 'screens', 'analyze.html')); // Carrega o arquivo secundário
+  analyzeWindow.loadFile(path.join(__dirname, "screens", "analyze.html")); // Carrega o arquivo secundário
 
   // Evento para fechar a janela secundária
-  analyzeWindow.on('closed', () => {
+  analyzeWindow.on("closed", () => {
     analyzeWindow = null;
   });
 
@@ -63,12 +72,12 @@ function createAnalyzeWindow(id) {
 }
 
 function createSettingWindow() {
-  const primaryDisplay = screen.getPrimaryDisplay()
-  const { width, height } = primaryDisplay.workAreaSize
-  const boundX = width - 400
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+  const boundX = width - 400;
 
   settingWindow = new BrowserWindow({
-    id: 'settingWindow',
+    id: "settingWindow",
     width: 400,
     height: height,
     alwaysOnTop: false,
@@ -79,81 +88,88 @@ function createSettingWindow() {
     y: 0,
     parent: mainWindow,
     webPreferences: {
-      preload: path.join(__dirname, 'src', 'preload.js')
-    }
-  })
+      preload: path.join(__dirname, "src", "preload.js"),
+    },
+  });
 
-  settingWindow.loadFile(path.join(__dirname, 'screens', 'settings.html'));
+  settingWindow.loadFile(path.join(__dirname, "screens", "settings.html"));
 }
 
-app.whenReady().then(() => {
-  const icon = nativeImage.createFromPath('assets/images/ganho-icon.png');
+app.whenReady().then(async () => {
+  await startDb();
+  const icon = nativeImage.createFromPath(
+    path.join(__dirname, "src", "images", "ganho-icon.png")
+  );
   icon.resize({
     height: 32,
     width: 32,
-    quality: 'better'
-  })
-  const tray = new Tray(icon)
+    quality: "better",
+  });
+  const tray = new Tray(icon);
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Sair', type: 'normal', toolTip: 'Fecha o programa', click: () => app.quit() },
-  ])
+    {
+      label: "Sair",
+      type: "normal",
+      toolTip: "Fecha o programa",
+      click: () => app.quit(),
+    },
+  ]);
 
-  tray.setTitle('My Money')
-  tray.setToolTip('My Money')
-  tray.setContextMenu(contextMenu)
-  tray.addListener('click', () => {
-    mainWindow.show()
+  tray.setTitle("My Money");
+  tray.setToolTip("My Money");
+  tray.setContextMenu(contextMenu);
+  tray.addListener("click", () => {
+    mainWindow.show();
   });
 
   createWindow();
   mainWindow.hide();
 
-  app.on('browser-window-blur', () => {
+  app.on("browser-window-blur", () => {
     const windowOpened = BrowserWindow.getAllWindows().some((window) => {
       return window.isVisible() && window.id !== mainWindow.id;
     });
 
-    if (!windowOpened)
-      mainWindow.hide();
+    if (!windowOpened) mainWindow.hide();
   });
 
-  app.on('activate', () => {
+  app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow()
+      createWindow();
     }
-  })
-})
+  });
+});
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
 
-ipcMain.handle('open-settings', (event) => {
+ipcMain.handle("open-settings", (event) => {
   createSettingWindow();
 });
 
-ipcMain.handle('load-settings', async (event) => {
+ipcMain.handle("load-settings", async (event) => {
   return await loadSettings();
 });
 
-ipcMain.handle('save-settings', (event, settings) => {
+ipcMain.handle("save-settings", (event, settings) => {
   if (!settings) return;
-  mainWindow.webContents.send('update-interval', settings.refreshInterval);
+  mainWindow.webContents.send("update-interval", settings.refreshInterval);
   mainWindow.show();
   saveSettings(settings);
 });
 
-ipcMain.handle('open-analyze', (event, id) => {
+ipcMain.handle("open-analyze", (event, id) => {
   createAnalyzeWindow(id);
 });
 
-ipcMain.handle('get-stock', async (event, data) => {
+ipcMain.handle("get-stock", async (event, data) => {
   return await getStock(data.id, data.startDate, data.endDate);
 });
 
-ipcMain.handle('find-stock', async (event, url) => {
+ipcMain.handle("find-stock", async (event, url) => {
   const result = await puppeteer.findStock(url);
 
   if (!result) return false;
@@ -165,15 +181,15 @@ ipcMain.handle('find-stock', async (event, url) => {
   return true;
 });
 
-ipcMain.handle('load-stocks', () => {
+ipcMain.handle("load-stocks", () => {
   return loadStocks();
 });
 
-ipcMain.handle('remove-stock', (event, id) => {
-  deleteStock(id)
+ipcMain.handle("remove-stock", (event, id) => {
+  deleteStock(id);
 });
 
-ipcMain.handle('update-data', async () => {
+ipcMain.handle("update-data", async () => {
   const stocks = await loadStocks();
   let result = null;
 
@@ -182,6 +198,7 @@ ipcMain.handle('update-data', async () => {
 
     if (result) {
       result.id = stock.id;
+      logger(`Stock updated: ${result.id} - ${result.title}`);
       saveStockValue(result);
     }
   }
@@ -196,7 +213,7 @@ function loadStocks() {
 }
 
 function updateList(stock) {
-  mainWindow.webContents.send('update-list', stock);
+  mainWindow.webContents.send("update-list", stock);
 }
 
 function deleteStock(id) {
