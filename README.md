@@ -6,9 +6,11 @@ I'm also using Puppeteer to scrape stock information.
 
 Full-stack project:
 
-- HTML
-- NodeJs
-- Puppeteer
+- HTML (frontend)
+- NodeJs (Backend)
+- ElectronJs (Backend)
+- Sqlite (Database)
+- Puppeteer (web crawler)
 
 ![preview](preview.gif)
 
