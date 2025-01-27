@@ -191,17 +191,17 @@ ipcMain.handle("remove-stock", (event, id) => {
 
 ipcMain.handle("update-data", async () => {
   const stocks = await loadStocks();
-  let result = null;
+  const result = await puppeteer.findStock(stocks);
 
-  for (const stock of stocks) {
-    result = await puppeteer.findStock(stock.url);
-
-    if (result) {
-      result.id = stock.id;
-      logger(`Stock updated: ${result.id} - ${result.title}`);
-      saveStockValue(result);
-    }
+  if (result.length === 0) {
+    logger("No stocks found to update");
+    return;
   }
+
+  for (const stock of result) {
+    saveStockValue(stock);
+  }
+  logger("Stocks updated");
 });
 
 function storeStock(stock) {
