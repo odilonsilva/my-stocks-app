@@ -1,157 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" type="text/css" href="../src/css/app.css" />
+    <style>
+      body {
+        margin: 10px;
+      }
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Settings</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="../src/css/app.css" />
-  <style>
-    body {
-      margin: 10px;
-    }
+      button {
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+      }
 
-    button {
-      margin-top: 10px;
-      padding: 15px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease-in-out;
-    }
-    
-    button.secondary {
-      background-color: #797979;
-    }
-    
-    button:hover {
-      background-color: #56c95b;
-    }
-    
-    button.secondary:hover {
-      background-color: #909090;
-    }
+      button.secondary {
+        background-color: #797979;
+      }
 
-    select {
-      margin: 5px 0px;
-      padding: 5px;
-      width: 50%;
-      height: 40px;
-      font-size: 20px;
-      line-height: 20px;
-    }
+      button:hover {
+        background-color: #56c95b;
+      }
 
-    label {
-      display: block;
-      width: 100%;
-      font-weight: 600;
-    }
+      button.secondary:hover {
+        background-color: #909090;
+      }
 
-    .form-group {
-      margin-bottom: 10px;
-    }
+      select {
+        margin: 5px 0px;
+        padding: 5px;
+        width: 50%;
+        height: 40px;
+        font-size: 20px;
+        line-height: 20px;
+      }
 
-    .switch {
-      margin: 5px 0px;
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 34px;
-    }
+      label {
+        display: block;
+        width: 100%;
+        font-weight: 600;
+      }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+      .form-group {
+        margin-bottom: 10px;
+      }
 
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      -webkit-transition: .4s;
-      transition: .4s;
-    }
+      .switch {
+        margin: 5px 0px;
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
 
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      -webkit-transition: .4s;
-      transition: .4s;
-    }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
 
-    input:checked+.slider {
-      background-color: #2196F3;
-    }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
 
-    input:focus+.slider {
-      box-shadow: 0 0 1px #2196F3;
-    }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
 
-    input:checked+.slider:before {
-      -webkit-transform: translateX(26px);
-      -ms-transform: translateX(26px);
-      transform: translateX(26px);
-    }
+      input:checked + .slider {
+        background-color: #2196f3;
+      }
 
-    /* Rounded sliders */
-    .slider.round {
-      border-radius: 34px;
-    }
+      input:focus + .slider {
+        box-shadow: 0 0 1px #2196f3;
+      }
 
-    .slider.round:before {
-      border-radius: 50%;
-    }
-  </style>
-</head>
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
 
-<body>
-  <h1>Settings</h1>
-  <div class="form-group">
-    <label for="refresh-interval">Refresh Interval (minutes):</label>
-    <select id="refresh-interval">
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="15">15</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <div>
-      <label for="update-on-startup">
-        Update on Startup
+      /* Rounded sliders */
+      .slider.round {
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
+
+      .link {
+        font-size: normal;
+        color: silver;
+        cursor: pointer;
+      }
+
+      .link:hover {
+        text-decoration: underline;
+      }
+
+      hr {
+        margin-top: 20px;
+        border-color: #555;
+      }
+
+      .align-center {
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="flex flex-space-between align-center">
+      <h1>Settings</h1>
+      <span class="link" onclick="openLogs()">Ver Logs</span>
+    </div>
+    <div class="form-group">
+      <label for="refresh-interval">Refresh Interval (minutes):</label>
+      <select id="refresh-interval">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <div>
+        <label for="update-on-startup"> Update on Startup </label>
+      </div>
+      <label class="switch">
+        <input id="update-on-startup" type="checkbox" checked />
+        <span class="slider round"></span>
       </label>
     </div>
-    <label class="switch">
-      <input id="update-on-startup" type="checkbox" checked>
-      <span class="slider round"></span>
-    </label>
-  </div>
-  <div class="form-group">
-    <div>
-      <label for="analyze-custom-color">
-        Analyze Custom Color
+    <div class="form-group">
+      <div>
+        <label for="analyze-custom-color"> Analyze Custom Color </label>
+      </div>
+      <label class="switch">
+        <input id="analyze-custom-color" type="checkbox" checked />
+        <span class="slider round"></span>
       </label>
     </div>
-    <label class="switch">
-      <input id="analyze-custom-color" type="checkbox" checked>
-      <span class="slider round"></span>
-    </label>
-  </div>
-  <button onclick="saveSettings()">Save</button>
-  <button class="secondary" onclick="cancelSettings()">Cancel</button>
-  <script src="../src/settings_renderer.js"></script>
-</body>
-
+    <button onclick="saveSettings()">Save</button>
+    <button class="secondary" onclick="cancelSettings()">Cancel</button>
+    <div>
+      <hr />
+      <h3>App storage information</h3>
+      <div>
+        <b>Database size: <span id="db-size"></span></b>
+      </div>
+      <div>
+        <b>Log size: <span id="log-size"></span></b>
+      </div>
+    </div>
+    <script src="../src/settings_renderer.js"></script>
+  </body>
 </html>

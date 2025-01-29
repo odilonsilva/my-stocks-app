@@ -21,6 +21,7 @@ const {
   loadSettings,
   saveSettings,
 } = require(path.join(__dirname, "src", "repository"));
+const fs = require("fs");
 
 let mainWindow;
 
@@ -95,6 +96,28 @@ function createSettingWindow() {
   settingWindow.loadFile(path.join(__dirname, "screens", "settings.html"));
 }
 
+function createLogWindow(id) {
+  logWindow = new BrowserWindow({
+    id: "logWindow",
+    width: 800,
+    height: 600,
+    frame: true,
+    parent: mainWindow, // Define a janela principal como pai
+    modal: true, // Faz a janela secundária modal
+    webPreferences: {
+      // nodeIntegration: true,
+      preload: path.join(__dirname, "src", "preload.js"),
+    },
+  });
+
+  logWindow.loadFile(path.join(__dirname, "screens", "logs.html")); // Carrega o arquivo secundário
+
+  // Evento para fechar a janela secundária
+  logWindow.on("closed", () => {
+    logWindow = null;
+  });
+}
+
 app.whenReady().then(async () => {
   await startDb();
   const icon = nativeImage.createFromPath(
@@ -150,8 +173,11 @@ ipcMain.handle("open-settings", (event) => {
   createSettingWindow();
 });
 
-ipcMain.handle("load-settings", async (event) => {
-  return await loadSettings();
+ipcMain.handle("load-settings", async () => {
+  const dbSize = (await fs.promises.stat("./data/database.db")).size || 0;
+  const logSize = (await fs.promises.stat("./app.log")).size || 0;
+  const settings = await loadSettings();
+  return { ...settings, dbSize, logSize };
 });
 
 ipcMain.handle("save-settings", (event, settings) => {
@@ -202,6 +228,14 @@ ipcMain.handle("update-data", async () => {
     saveStockValue(stock);
   }
   logger("Stocks updated");
+});
+
+ipcMain.handle("open-logs", () => {
+  createLogWindow();
+});
+
+ipcMain.handle("get-logs", async () => {
+  return await fs.promises.readFile("./app.log", "utf-8");
 });
 
 function storeStock(stock) {
