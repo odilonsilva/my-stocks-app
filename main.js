@@ -20,6 +20,7 @@ const {
   getStock,
   loadSettings,
   saveSettings,
+  getStockLastID,
 } = require(path.join(__dirname, "src", "repository"));
 const fs = require("fs");
 
@@ -177,6 +178,9 @@ ipcMain.handle("load-settings", async () => {
   const dbSize = (await fs.promises.stat("./data/database.db")).size || 0;
   const logSize = (await fs.promises.stat("./app.log")).size || 0;
   const settings = await loadSettings();
+
+  if (settings === null || settings === undefined) return null;
+
   return { ...settings, dbSize, logSize };
 });
 
@@ -196,19 +200,21 @@ ipcMain.handle("get-stock", async (event, data) => {
 });
 
 ipcMain.handle("find-stock", async (event, url) => {
-  const result = await puppeteer.findStock(url);
+  const stockId = await getStockLastID();
 
-  if (!result) return false;
+  const result = await puppeteer.findStock([{ id: stockId + 1, url }]);
 
-  storeStock(result);
+  if (result.length === 0) return false;
 
-  updateList(result);
+  storeStock(result[0]);
+
+  updateList(result[0]);
 
   return true;
 });
 
-ipcMain.handle("load-stocks", () => {
-  return loadStocks();
+ipcMain.handle("load-stocks", async () => {
+  return await getStocks();
 });
 
 ipcMain.handle("remove-stock", (event, id) => {
@@ -216,7 +222,7 @@ ipcMain.handle("remove-stock", (event, id) => {
 });
 
 ipcMain.handle("update-data", async () => {
-  const stocks = await loadStocks();
+  const stocks = await getStocks();
   const result = await puppeteer.findStock(stocks);
 
   if (result.length === 0) {
@@ -240,10 +246,6 @@ ipcMain.handle("get-logs", async () => {
 
 function storeStock(stock) {
   saveStock(stock);
-}
-
-function loadStocks() {
-  return getStocks();
 }
 
 function updateList(stock) {

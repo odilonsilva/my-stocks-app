@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer");
-const { logger } = require("./logger");
+const { logger, LOG_TYPE_ERROR } = require("./logger");
 
 exports.findStock = async (stocks) => {
   // Launch the browser and open a new blank page
@@ -105,13 +105,14 @@ exports.findStock = async (stocks) => {
 
       await page.close();
       stockItems.push(stock);
-      logger(`${item.id} ${item.title} updated.`);
+      logger(`${item.id} ${titleContent.trim()} updated.`);
     }
     await browser.close();
     return stockItems;
   } catch (error) {
-    logger(`[puppeteer] ${error}`);
+    logger(`[puppeteer] ${error}`, LOG_TYPE_ERROR);
+  } finally {
     await browser.close();
-    return [];
+    return stockItems;
   }
 };

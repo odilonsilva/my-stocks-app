@@ -1,5 +1,6 @@
 const sqlite = require("sqlite3").verbose();
-const fs = require("node:fs");
+const fs = require("fs").promises;
+const path = require("path");
 const { logger, LOG_TYPE_ERROR } = require("./logger");
 
 function openDB() {
@@ -13,20 +14,16 @@ function openDB() {
 async function startDb() {
   logger(`[startDb] Iniciando aplicação.`);
 
-  const dbPath = "./data";
-  if (!fs.existsSync(`${dbPath}/database.db`)) {
-    await new Promise((resolve, reject) => {
-      fs.mkdir(dbPath, { mode: 777 }, (err) => {
-        if (err) {
-          logger(
-            `[startDb] erro ao criar diretório de banco de dados. ${err}`,
-            LOG_TYPE_ERROR
-          );
-          reject(`[startDb] erro ao criar diretório de banco de dados. ${err}`);
-        }
-        resolve();
-      });
-    });
+  try {
+    await fs.mkdir("./data", { recursive: true });
+  } catch (err) {
+    logger(
+      `[startDb] erro ao criar diretório de banco de dados. ${err}`,
+      LOG_TYPE_ERROR
+    );
+    throw new Error(
+      `[startDb] erro ao criar diretório de banco de dados. ${err}`
+    );
   }
 
   const db = openDB();
@@ -52,31 +49,26 @@ async function startDb() {
     `CREATE INDEX IF NOT EXISTS idx_stocks_values_stockId ON stocks_values (stockId)`
   ); // index
 
-  db.exec(`CREATE TABLE IF NOT EXISTS settings 
+  db.exec(
+    `CREATE TABLE IF NOT EXISTS settings 
     (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       refresh_interval INTEGER DEFAULT 5,
       update_on_startup BOOLEAN DEFAULT 0,
       analyze_custom_color BOOLEAN DEFAULT 1
-    );`);
+    );`,
+    (err) => {
+      if (err) {
+        logger(
+          `[startDb] erro ao criar tabela de configurações. ${err}`,
+          LOG_TYPE_ERROR
+        );
+      }
+    }
+  );
 
   db.close();
-
-  try {
-    if ((await loadSettings()) === undefined) {
-      logger(`[startDb] Criando configurações padrão.`);
-      await saveSettings({
-        refreshInterval: 5,
-        updateOnStartup: 1,
-        analyzeCustomColor: 1,
-      });
-    }
-  } catch (err) {
-    logger(
-      `[startDb] erro ao criar configurações padrão. ${err}`,
-      LOG_TYPE_ERROR
-    );
-  }
+  await initializeSettings();
 }
 
 function saveStock(stock) {
@@ -307,6 +299,55 @@ async function loadSettings() {
   return data;
 }
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function initializeSettings() {
+  try {
+    await delay(500); // Atraso de 500ms
+    const settings = await loadSettings();
+    if (!settings) {
+      logger(`[startDb] Criando configurações padrão.`);
+      await saveSettings({
+        refreshInterval: 5,
+        updateOnStartup: 1,
+        analyzeCustomColor: 1,
+      });
+    }
+  } catch (err) {
+    logger(
+      `[startDb] erro ao criar configurações padrão. ${err}`,
+      LOG_TYPE_ERROR
+    );
+  }
+}
+
+async function getStockLastID() {
+  const db = openDB();
+
+  const stockId = await new Promise((resolve, reject) => {
+    db.get(
+      `SELECT id FROM stocks ORDER BY id DESC LIMIT 1;`,
+      [],
+      function (error, rows) {
+        if (error) {
+          logger(
+            `[getStock] erro ao buscar ultimo ID. ${error.message}`,
+            LOG_TYPE_ERROR
+          );
+          reject(`[getStock] erro ao buscar ultimo ID. ${error.message}`);
+        }
+        resolve(rows);
+      }
+    );
+  });
+
+  db.close();
+
+  return stockId ? stockId.id : 0;
+}
+
 module.exports = {
   startDb,
   saveStock,
@@ -316,4 +357,5 @@ module.exports = {
   getStock,
   saveSettings,
   loadSettings,
+  getStockLastID,
 };

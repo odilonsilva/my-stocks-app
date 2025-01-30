@@ -1,55 +1,55 @@
 let stocks = [];
-let filter = 'all';
+let filter = "all";
 let interval;
 
 function openAddStock() {
-  const backdrop = document.querySelector('.entries-container')
-  backdrop.style = 'display: block'
+  const backdrop = document.querySelector(".entries-container");
+  backdrop.style = "display: block";
 }
 
 function closeAddStock() {
-  const backdrop = document.querySelector('.entries-container')
-  backdrop.style = 'display: none'
+  const backdrop = document.querySelector(".entries-container");
+  backdrop.style = "display: none";
 }
 
 async function saveUrl() {
-  const input = document.querySelector('#url')
-  const emptyUrl = document.querySelector('#emptyUrl')
-  const invalidUrl = document.querySelector('#urlError')
-  const btnSave = document.querySelector('#btn-save')
+  const input = document.querySelector("#url");
+  const emptyUrl = document.querySelector("#emptyUrl");
+  const invalidUrl = document.querySelector("#urlError");
+  const btnSave = document.querySelector("#btn-save");
 
-  emptyUrl.style = 'display: none'
-  invalidUrl.style = 'display: none'
-  input.classList.remove('input-error')
+  emptyUrl.style = "display: none";
+  invalidUrl.style = "display: none";
+  input.classList.remove("input-error");
 
-  if (input.value == '' || input.value == null) {
-    emptyUrl.style = 'display: block'
-    input.classList.add('input-error')
-    return false
+  if (input.value == "" || input.value == null) {
+    emptyUrl.style = "display: block";
+    input.classList.add("input-error");
+    return false;
   }
   const urlRegex = /^https:\/\/www\.infomoney\.com\.br\/[^\s/$.?#].[^\s]*$/i;
   if (!urlRegex.test(input.value)) {
-    invalidUrl.style = 'display: block'
-    input.classList.add('input-error')
-    return false
+    invalidUrl.style = "display: block";
+    input.classList.add("input-error");
+    return false;
   }
 
-  btnSave.textContent = 'Carregando...';
-  const result = await window.electronAPI.findStock(input.value)
-  btnSave.textContent = 'Salvar';
+  btnSave.textContent = "Carregando...";
+  const result = await window.electronAPI.findStock(input.value);
+  btnSave.textContent = "Salvar";
 
   if (!result) {
-    invalidUrl.style = 'display: block'
-    input.classList.add('input-error')
-    return false
+    invalidUrl.style = "display: block";
+    input.classList.add("input-error");
+    return false;
   }
 }
 
 function mountStock(stock) {
-  const updated_at = document.querySelector('#updated_at');
-  updated_at.textContent = new Date(stock.updated_at).toLocaleString()
+  const updated_at = document.querySelector("#updated_at");
+  updated_at.textContent = new Date(stock.updated_at).toLocaleString();
 
-  const stocksContainer = document.querySelector('.stocks');
+  const stocksContainer = document.querySelector(".stocks");
   const newStock = `
   <div class="flex items-container">
     <div class="remove" onclick="remove(${stock.id})">
@@ -68,7 +68,9 @@ function mountStock(stock) {
       <div class="card-title">${stock.title}</div>
       <div class="card-info">
         <div class="card-price">${stock.value}</div>
-        <div class="card-percent ${stock.status}">${showSignal(stock)} ${stock.percentage}%</div>
+        <div class="card-percent ${stock.status}">${showSignal(stock)} ${
+    stock.percentage
+  }%</div>
       </div>
     </div>
   </div>`;
@@ -84,7 +86,7 @@ function analyze(id) {
 }
 
 function remove(id) {
-  if (window.confirm('Deseja excluir esse item')) {
+  if (window.confirm("Deseja excluir esse item")) {
     window.electronAPI.deleteStock(id);
     setTimeout(() => {
       clearStocks();
@@ -94,8 +96,8 @@ function remove(id) {
 }
 
 function clearStocks() {
-  const stocksContainer = document.querySelector('.stocks');
-  stocksContainer.innerHTML = '';
+  const stocksContainer = document.querySelector(".stocks");
+  stocksContainer.innerHTML = "";
 }
 
 window.electronAPI.updateListHandler((event, value) => {
@@ -104,31 +106,30 @@ window.electronAPI.updateListHandler((event, value) => {
 });
 
 function setFilter(element, value) {
-  const filterList = document.querySelectorAll('.filters button');
+  const filterList = document.querySelectorAll(".filters button");
   filter = value;
   let stocksLocal;
 
-  for (const filter of filterList)
-    filter.classList.remove('active');
+  for (const filter of filterList) filter.classList.remove("active");
 
-  element.classList.add('active');
+  element.classList.add("active");
   clearStocks();
 
   switch (value) {
-    case 'all':
+    case "all":
       loadStocks();
       return;
-    case 'positive':
-      stocksLocal = stocks.filter((item) => item.status === 'positive');
+    case "positive":
+      stocksLocal = stocks.filter((item) => item.status === "positive");
       break;
-    case 'negative':
-      stocksLocal = stocks.filter((item) => item.status === 'negative');
+    case "negative":
+      stocksLocal = stocks.filter((item) => item.status === "negative");
       break;
-    case 'neutral':
-      stocksLocal = stocks.filter((item) => item.status === 'neutral');
+    case "neutral":
+      stocksLocal = stocks.filter((item) => item.status === "neutral");
       break;
-    case 'fii':
-      stocksLocal = stocks.filter((item) => item.url.includes('fii'));
+    case "fii":
+      stocksLocal = stocks.filter((item) => item.url.includes("fii"));
       break;
   }
 
@@ -139,39 +140,38 @@ function setFilter(element, value) {
 
 async function loadStocks() {
   stocks = await window.electronAPI.loadStocks();
-  
-  if (stocks.length === 0)
-    openAddStock();
+
+  if (stocks.length === 0) openAddStock();
 
   for (const stock of stocks) {
-    mountStock(stock)
+    mountStock(stock);
   }
 }
 
 async function updateData() {
-  console.log(`updated at`, (new Date()).toLocaleString())
-  const selectedElement = document.querySelector('.filters button.active');
-  const buttonUpdate = document.getElementById('btn-update');
-  buttonUpdate.classList.add('disabled');
+  console.log(`updated at`, new Date().toLocaleString());
+  const selectedElement = document.querySelector(".filters button.active");
+  const buttonUpdate = document.getElementById("btn-update");
+  buttonUpdate.classList.add("disabled");
   buttonUpdate.attributes.disabled = true;
-  
+
   await window.electronAPI.updateData();
-  
+
   clearStocks();
   setFilter(selectedElement, filter);
 
-  buttonUpdate.classList.remove('disabled');
+  buttonUpdate.classList.remove("disabled");
   buttonUpdate.attributes.disabled = false;
 }
 
 function showSignal(stocks) {
-  if (stocks.status === 'positive') {
-    return '+';
-  } else if (stocks.status === 'negative') {
-    return '-';
-  } else { 
-    return '';
-   }
+  if (stocks.status === "positive") {
+    return "+";
+  } else if (stocks.status === "negative") {
+    return "-";
+  } else {
+    return "";
+  }
 }
 
 window.electronAPI.updateInterval(async (event, value) => {
@@ -184,8 +184,9 @@ window.onload = async function () {
 
   loadStocks();
 
+  if (settings === null) return;
+
   interval = setInterval(updateData, 1000 * 60 * settings.refresh_interval);
 
-  if (settings.update_on_startup === 1)
-    updateData();
-}
+  if (settings.update_on_startup === 1) updateData();
+};
